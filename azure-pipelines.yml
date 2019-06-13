@@ -6,22 +6,53 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'vs2015-win2012r2'
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+  
+  pool:
+    vmImage: 'vs2015-win2012r2'
 
-variables:
-  buildConfiguration: 'Release'
-  workingDirectory: '$(Build.SourcesDirectory)/CoreWebAppAzure/src/CoreWebAppAzure'
+  variables:
+    buildConfiguration: 'Release'
+    workingDirectory: '$(Build.SourcesDirectory)/CoreWebAppAzure/src/CoreWebAppAzure'
 
-steps:
-- script: dotnet restore
-  displayName: Restore
-  workingDirectory: $(workingDirectory)
+  steps:
+  - script: dotnet restore
+    displayName: Restore
+    workingDirectory: $(workingDirectory)
 
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'dotnet build $(buildConfiguration)'
-  workingDirectory: $(workingDirectory)
+  - script: dotnet build --configuration $(buildConfiguration)
+    displayName: 'dotnet build $(buildConfiguration)'
+    workingDirectory: $(workingDirectory)
 
-- script: dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
-  displayName: Publish
-  workingDirectory: $(workingDirectory)
+
+  - script: dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+    displayName: Publish
+    workingDirectory: $(workingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
+
+- stage: Deploy
+  jobs:
+  - job: Deploy
+    steps:       
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        ArtifactName: 'drop'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'PwC IT Dev Layer 7 API Management (0a48ab49-9a73-405c-a5c0-40d869d9fdeb)'
+        appType: 'webApp'
+        WebAppName: 'CoreWebAppAzure20190613122651'
+        packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
