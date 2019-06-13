@@ -14,7 +14,7 @@ variables:
   workingDirectory: '$(Build.SourcesDirectory)/CoreWebAppAzure/src/CoreWebAppAzure'
 
 steps:
-- script: dotnet restore ../../CoreWebAppAzure.sln
+- script: dotnet restore
   displayName: Restore
   workingDirectory: $(workingDirectory)
 
