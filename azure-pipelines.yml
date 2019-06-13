@@ -37,22 +37,3 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'drop'
         publishLocation: 'Container'
-
-- stage: Deploy
-  jobs:
-  - job: Deploy
-    steps:       
-    - task: DownloadBuildArtifacts@0
-      inputs:
-        buildType: 'current'
-        downloadType: 'single'
-        ArtifactName: 'drop'
-        downloadPath: '$(System.ArtifactsDirectory)'
-
-    - task: AzureRmWebAppDeployment@4
-      inputs:
-        ConnectionType: 'AzureRM'
-        azureSubscription: 'PwC IT Dev Layer 7 API Management (0a48ab49-9a73-405c-a5c0-40d869d9fdeb)'
-        appType: 'webApp'
-        WebAppName: 'CoreWebAppAzure20190613122651'
-        packageForLinux: '$(System.ArtifactsDirectory)/*.zip'
