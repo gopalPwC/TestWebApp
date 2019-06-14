@@ -27,6 +27,11 @@ stages:
       displayName: 'dotnet build $(buildConfiguration)'
       workingDirectory: $(workingDirectory)
 
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        publishWebProjects: true
+        workingDirectory: $(workingDirectory)
 
     - task: PublishBuildArtifacts@1
       inputs:
