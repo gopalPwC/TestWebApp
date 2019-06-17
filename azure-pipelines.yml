@@ -23,14 +23,12 @@ stages:
     - script: dotnet restore
       displayName: Restore
       workingDirectory: $(workingDirectory)
-
     - task: VSBuild@1
-      displayName: 'Build solution'
       inputs:
         solution: '**\\*.sln'
         msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactstagingdirectory)\\"'
-        platform: '$(BuildPlatform)'
-        configuration: '$(BuildConfiguration)'
+        platform: 'AnyCPU'
+        configuration: 'Release'
 
     - task: PublishBuildArtifacts@1
       inputs:
