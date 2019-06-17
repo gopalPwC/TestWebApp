@@ -16,6 +16,7 @@ stages:
 
     variables:
       buildConfiguration: 'Release'
+      BuildPlatform: 'any cpu'
       workingDirectory: '$(Build.SourcesDirectory)/CoreWebAppAzure/src/CoreWebAppAzure'
 
     steps:
@@ -23,11 +24,18 @@ stages:
       displayName: Restore
       workingDirectory: $(workingDirectory)
 
-    - script: dotnet build --configuration $(buildConfiguration)
-      displayName: 'dotnet build $(buildConfiguration)'
-      workingDirectory: $(workingDirectory)
+    - task: VSBuild@1
+      displayName: 'Build solution'
+      inputs:
+        solution: '$(Parameters.solution)'
+        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactstagingdirectory)\\"'
+        platform: '$(BuildPlatform)'
+        configuration: '$(BuildConfiguration)'
 
-    - script: dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) --artifactName drop
-      displayName: Publish     
-      workingDirectory: $(workingDirectory)
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+   
 
